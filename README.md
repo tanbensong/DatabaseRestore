@@ -10,14 +10,5 @@
 
 home
 
-```mermaid
-graph TD
-A[serverAddress]
-    A --> B [服务器地址]
-    A --> B [登陆用户]
-    A --> B [登陆方法]
-    A --> B [远程端口]
-    A --> B [用户密码]
-    A --> B [密钥文件]
-    
-```
+
+![home](./home.png)
