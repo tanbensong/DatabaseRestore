@@ -10,10 +10,10 @@ class ServerAddress(models.Model):
     )
 
     server = models.CharField(max_length=20, unique=True, verbose_name="服务器地址")
-    user = models.CharField(max_length=30, default="feidao", verbose_name="登陆用户")
+    user = models.CharField(max_length=30, default="root", verbose_name="登陆用户")
     status = models.SmallIntegerField(default=0, choices=statusSsh, verbose_name="登陆方法")
     post = models.IntegerField(default=1022, verbose_name="远程端口")
-    passwd = models.CharField(max_length=40, default="fdcf@2020", null=True, blank=True, verbose_name="用户密码")
+    passwd = models.CharField(max_length=40, default="123456", null=True, blank=True, verbose_name="用户密码")
     keyfile = models.FilePathField(path="/home/feidao/.ssh/", null=True, blank=True, verbose_name="密钥文件")
     remarks = models.CharField(max_length=20, null=True, blank=True, verbose_name="备注")
 
