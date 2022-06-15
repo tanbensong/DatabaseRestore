@@ -1,23 +1,15 @@
-# devops
-## home
-主页显示内容
+# 目录说明
+## devops
+数据库欢迎配置中心
 
-- 程序运行情况
-- 重启程序
+## database
+数据库操作 APP
 
-## restore
-数据备份情况
+- 数据库备份
+- 数据库还原
 
-- 默认只显示进7天的备份文件
+## static && templates
+静态文件和模版
 
-数据恢复操作
-
-## 数据库设计
-
-home
-
-![home](./home.png)
-
-restore
-
-![restore](./restore.png)
+## user
+用户中心
