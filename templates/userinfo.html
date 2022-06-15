@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block style %}
+<style>
+    body {
+        background-image: url({% static 'img/userinfo.jpg' %});
+        background-position: center;
+        background-attachment: fixed;
+        background-size: cover;
+    }
+
+    .error_tip {
+        color: #e62e2e;
+        display: none;
+        padding-left: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block script %}
+<script>
+    {% if errmsg %}
+    $(function(){
+        alert("{{ errmsg }}")
+    })
+    {% endif %}
+</script>
+{% endblock %}
+
+{% block baseBody %}
+<div>
+    <form action="" method="post" class="user-info">
+        {% csrf_token %}
+        <div class="modal-dialog login">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #337ab7;border-color: #2e6da4;">
+    
+                    <h4 class="modal-title text-center" id="myModalLabel" style="color: #fff;">思方运维平台</h4>
+                    <h5 class="modal-title text-center" id="myModalLabel" style="color: #fff;">修改密码</h5>
+                </div>
+                <div class="modal-body" id = "model-body">
+                    <div class="form-group">
+                        {{ form.oldPassword.label_tag }}
+                        <span class="error_tip">提示信息</span>
+                        {% if form.errors.oldPassword.0 %}
+                        <span>{{ form.errors.oldPassword.0 }}</span>
+                        {% endif %}
+                        {{ form.oldPassword }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.newPassword.label_tag }}
+                        <span class="error_tip">提示信息</span>
+                        {{ form.newPassword }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.confirmPassword.label_tag }}
+                        <span class="error_tip">提示信息</span>
+                        {{ form.confirmPassword }}
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary form-control">确认修改</button>
+                    </div>
+                </div>
+            </div><!-- /.modal-content -->
+        </div>
+    </form>
+</div>
+    
+<script>
+
+</script>
+{% endblock %}

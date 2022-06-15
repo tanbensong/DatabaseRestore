@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="{% static 'js/jquery-2.0.2.min.js' %}"></script>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/bootstrap-select.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/devops.css' %}" rel="stylesheet">
+    <link rel="icon" href="{% static 'img/favicon.ico' %}">
+
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap-select.min.js' %}"></script>
+    <script src="{% static 'js/devops.js' %}"></script>
+
+    {% block link %}{% endblock %}
+
+    {% block title %}
+    <title>思方数据库还原工具</title>
+    {% endblock %}
+    {% block style %}
+    {% endblock %}
+    {% block newstyle %}
+    {% endblock %}
+</head>
+<body>
+    {% block baseBody %}
+    {% endblock %}
+    {% block script %}
+    {% endblock %}
+</body>
+</html>

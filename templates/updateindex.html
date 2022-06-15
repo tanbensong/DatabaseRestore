@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP静态文件更新</title>
+    <script src="https://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js"></script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <!-- <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet"> -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <!-- <script src="{% static 'js/bootstrap.min.js' %}" type="text/javascript"></script> -->
+
+    <style>
+        .container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px solid #000;
+            padding: 0 30px 20px 30px;
+        }
+
+        .container h2 {
+            text-align: center;
+        }
+
+        .container label {
+            width: 110px;
+            float: left;
+            padding-right: 10px;
+            text-align: right;
+            display: block;
+        }
+
+        .form-fixed-height {
+            width: 700px;
+            margin: 0 auto;
+            padding: 10px 0;
+        }
+
+        .clearfloat:after {
+            display: block;
+            clear: both;
+            content: "";
+            visibility: hidden;
+            height: 0
+        }
+
+        .clearfloat {
+            zoom: 1
+        }
+
+        .text-align {
+            text-align: center;
+        }
+
+        .alert-position {
+            position: fixed;
+            top: 30%;
+            left: 50%;
+            width: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>思方ERP系统静态文件地址更新</h2>
+        <form action="/uploadfile/dllUpload/" method="post" enctype="multipart/form-data"
+            class="form-fixed-height clearfloat" id="dllUpload">
+            <div style="float: left;">
+                {% csrf_token %}
+                {{ AutoUpdater }}
+            </div>
+            <div class="progress" style="width: 200px; float: left;">
+                <div class="progress-bar"></div>
+            </div>
+            <div style="float: right;">
+                <input type="submit" value="更新" style="width: 80px;" id="dllfile_btn">
+            </div>
+        </form>
+        <form action="/uploadfile/javaUpload/" method="post" enctype="multipart/form-data"
+            class="form-fixed-height clearfloat" id="javaUpload">
+            <div style="float: left;">
+                {% csrf_token %}
+                {{ Java }}
+            </div>
+            <div class="progress" style="width: 200px; float: left;">
+                <div class="progress-bar"></div>
+            </div>
+            <div style="float: right;">
+                <input type="submit" value="更新" style="width: 80px;" id="javafile_btn">
+            </div>
+        </form>
+        <form action="/uploadfile/dotnetUpload/" method="post" enctype="multipart/form-data"
+            class="form-fixed-height clearfloat" id="dotnetUpload">
+            <div style="float: left;">
+                {% csrf_token %}
+                {{ Dotnet }}
+            </div>
+            <div class="progress" style="width: 200px; float: left;">
+                <div class="progress-bar"></div>
+            </div>
+            <div style="float: right;">
+                <input type="submit" value="更新" style="width: 80px;" id="dotnetfile_btn">
+            </div>
+        </form>
+    </div>
+    <!-- 弹窗内容 -->
+    <div class="modal" id="modalSuccess" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="alert alert-success text-align alert-position" role="alert">
+            <button type="button" class="close" aria-label="Close"><span aria-hidden="true">×</span></button>
+            <p id="flieInfo"></p>
+            <p id="successInfo"></p>
+        </div>
+    </div>
+    <div class="modal" id="modalFaild" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+        data-backdrop="static">
+        <div class="alert alert-danger text-align alert-position" role="alert">
+            <button type="button" class="close" aria-label="Close"><span aria-hidden="true">×</span></button>
+            <span id="faildInfo">上传失败!</span>
+        </div>
+    </div>
+</body>
+<script>
+    $('.close').on('click', function () {
+        $('.modal').modal('hide')
+    })
+    function progressHandlingFunction(progressBar) {
+        return function (event) {
+            var loaded = Math.floor(100 * (event.loaded / event.total)); //已经上传的百分比
+
+            let progressBarText = loaded + "%"
+            if (loaded >= 100) {
+                progressBarText = '等待文件保存完毕...'
+            }
+            progressBar.html(progressBarText).css("width", loaded + "%");
+        }
+    }
+    $('#dllUpload,#javaUpload,#dotnetUpload').submit(function (event) {
+        event.preventDefault();
+        var form = $(this);
+        const progressBar = form.find('.progress-bar')
+        var formData = new FormData(this);
+        function emptyLimit($dom) {
+            return $dom.val() === ''
+        }
+
+        if (emptyLimit(form.find('input[type="file"]'))) {
+            alert('没有选择文件上传！')
+            return
+        }
+
+        // #id_javafile,#id_dotnetfile'
+
+        $.ajax({
+            type: form.attr('method'),
+            url: form.attr('action'),
+            beforeSend: function () {
+                $('#dllfile_btn,#javafile_btn,#dotnetfile_btn').attr('disabled', true)
+            },
+            complete: function () {
+                $('#dllfile_btn,#javafile_btn,#dotnetfile_btn').attr('disabled', false)
+                progressBar.html('').css("width", 0);
+            },
+            data: formData,
+            mimeType: "multipart/form-data",
+            contentType: false,
+            cache: false,
+            processData: false,
+            dataType: 'json', //返回数据形式json
+            success: function (data) {
+                const { status, info, file } = data
+                if (status === 200) {
+                    $('#modalSuccess').modal('show').ready(function () {
+                        if (data.file && data.file.length > 0) {
+                            $('#flieInfo').text(`${data.file.toString()}`)
+                            $('#successInfo').text(unescape(data.info))
+                        }
+                    })
+                } else {
+                    $('#modalFaild').modal('show').ready(function () {
+                        $('#faildInfo').text(unescape(data.info))
+                    })
+                }
+                // var id = $("#dllUpload_msg").val();
+                // var rowNode = gridOptions.api.getRowNode(id);
+                // rowNode.setDataValue('photo', data);
+            },
+            xhr: function () {
+                myXhr = $.ajaxSettings.xhr();
+                if (myXhr.upload) { //检查upload属性是否存在  
+                    //绑定progress事件的回调函数  
+                    myXhr.upload.addEventListener('progress', progressHandlingFunction(progressBar), false);
+                }
+                return myXhr; //xhr对象返回给jQuery使用
+            },
+            error() {
+                $('#modalFaild').modal('show')
+            }
+
+        })
+    });
+</script>
+
+</html>

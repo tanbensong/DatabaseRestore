@@ -1,0 +1,191 @@
+{% extends 'top.html' %}
+{% load static %}{% load filter %}
+
+{% block link %}
+<script src="{% static 'js/echarts.min.js' %}"></script>
+{% endblock %}
+
+{% block title %}
+<title>思方运维平台</title>
+{% endblock %}
+
+{% block content %}
+<div>
+    <div class="page-header devops-search">
+        <div class="pull-left">
+            <h2>客户服务器磁盘空间信息</h2>
+        </div>
+    </div>
+    {% for client in clientinfos %}
+    <div>
+        <div style="width: 100%;line-height: 70px;overflow: hidden;">
+            <div style="width: 200px; float: left;">
+                <div style="font-size: 24px;"><span>{{ client.client.name }} </span>{% if client.remarks %}<span>{{ client.remarks }}</span>{% endif %}</div>
+            </div>
+            <div style="float: left;">
+                {% for disk in client.diskinfo %}
+                <p style="font-weight:bold;">
+                    <span style="width: 150px; color: #FF0000; display: inline-block;">数据盘总空间：</span>
+                    <span style="width: 90px; color: #0000FF; display: inline-block;">{{ disk.total|diskSize }} </span>
+                    <span style="width: 150px; color: #FF0000; display: inline-block;">数据盘已使用空间：</span>
+                    <span style="width: 90px; color: #0000FF; display: inline-block;">{{ disk.used|diskSize }} </span>
+                    <span style="width: 150px; color: #FF0000; display: inline-block;">数据盘剩余空间：</span>
+                    <span style="width: 90px; color: #0000FF; display: inline-block;">{{ disk.surplus|diskSize }} </span>
+                </p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="row" style="border-bottom: 1px solid;">
+            <div class="col-md-6">
+                <div id="data{{ client.id }}" style="width: 100%; height: 400px;"></div>
+                <script type="text/javascript">
+                    var myChart = echarts.init(document.getElementById('data{{ client.id }}'));
+                    var option = {
+                        title: {
+                            text: "数据库使用空间"
+                        },
+                        tooltip: {
+                            trigger: 'axis',
+                        },
+                        toolbox: {
+                            show: true,
+                            feature: {
+                                restore: {},
+                                saveAsImage: {
+                                    type: 'png',
+                                }  // 导出图片
+                            }
+                        },
+                        legend: {
+                            data: ['mssql数据使用空间', 'pg数据使用空间', 'mongo数据使用空间']
+                        },
+                        grid: {
+                            left: '3%',
+                            right: '4%',
+                            bottom: '3%',
+                            containLabel: true
+                        },
+                        xAxis: {
+                            type: 'category',
+                            // name: "日期",
+                            boundaryGap: false,
+                            axisTick: {
+                                alignWithLabel: true
+                            },
+                            data: [{% for datatime in client.clientserver %}{% if datatime.create_time %}"{{ datatime.create_time|date:"Y-m-j" }}",{% endif %}{% endfor %}],
+                            axisLabel: {
+                                rotate: 45,
+                            }
+                        },
+                        yAxis: {
+                            type: 'value',
+                            name: "数据使用空间",
+                            axisLabel: {
+                                formatter: '{value} G'
+                            }
+                        },
+                        series: [
+                            {
+                                name: 'mssql数据使用空间',
+                                type: 'line',
+                                {% comment %} yAxisIndex: 0, {% endcomment %}
+                                data: [{% for mssqluse in client.clientserver %}{% if mssqluse.mssqluse %}({{ mssqluse.mssqluse }} / 1024 / 1024).toFixed(2), {% else %}0, {% endif %}{% endfor %}],
+                            },
+                            {
+                                name: 'pg数据使用空间',
+                                type: 'line',
+                                {% comment %} yAxisIndex: 0, {% endcomment %}
+                                data: [{% for pguse in client.clientserver %}{% if pguse.pguse %}({{ pguse.pguse }} / 1024 / 1024).toFixed(2), {% else %}0, {% endif %}{% endfor %}],
+                            },
+                            {
+                                name: 'mongo数据使用空间',
+                                type: 'line',
+                                {% comment %} yAxisIndex: 0, {% endcomment %}
+                                data: [{% for mongouse in client.clientserver %}{% if mongouse.mongouse %}({{ mongouse.mongouse }} / 1024 / 1024).toFixed(2), {% else %}0, {% endif %}{% endfor %}],
+                            },
+                        ]
+                    };
+                    myChart.setOption(option);
+                </script>
+            </div>
+            <div class="col-md-6">
+                <div id="backup{{ client.id }}" style="width: 100%; height: 400px;"></div>
+                <script type="text/javascript">
+                    var myChart = echarts.init(document.getElementById('backup{{ client.id }}'));
+                    var option = {
+                        title: {
+                            text: "数据库备份空间"
+                        },
+                        tooltip: {
+                            trigger: 'axis',
+                        },
+                        toolbox: {
+                            show: true,
+                            feature: {
+                                restore: {},
+                                saveAsImage: {
+                                    type: 'png',
+                                }  // 导出图片
+                            }
+                        },
+                        legend: {
+                            data: ['mssql数据备份空间', 'pg数据备份空间', 'mongo数据备份空间']
+                        },
+                        grid: {
+                            left: '3%',
+                            right: '4%',
+                            bottom: '3%',
+                            containLabel: true
+                        },
+                        xAxis: {
+                            type: 'category',
+                            // name: "日期",
+                            boundaryGap: false,
+                            axisTick: {
+                                alignWithLabel: true
+                            },
+                            data: [{% for datatime in client.clientserver %}{% if datatime.create_time %}"{{ datatime.create_time|date:"Y-m-j" }}",{% endif %}{% endfor %}],
+                            axisLabel: {
+                                rotate: 45,
+                            }
+                        },
+                        yAxis: {
+                            type: 'value',
+                            name: "数据备份空间",
+                            axisLabel: {
+                                formatter: '{value} G'
+                            }
+                        },
+                        series: [
+                            {
+                                name: 'mssql数据备份空间',
+                                type: 'line',
+                                {% comment %} yAxisIndex: 0, {% endcomment %}
+                                data: [{% for mssqlbak in client.clientserver %}{% if mssqlbak.mssqlbak %}({{ mssqlbak.mssqlbak }} / 1024 / 1024).toFixed(2), {% else %}0, {% endif %}{% endfor %}],
+                            },
+                            {
+                                name: 'pg数据备份空间',
+                                type: 'line',
+                                {% comment %} yAxisIndex: 0, {% endcomment %}
+                                data: [{% for pgbak in client.clientserver %}{% if pgbak.pgbak %}({{ pgbak.pgbak }} / 1024 / 1024).toFixed(2), {% else %}0, {% endif %}{% endfor %}],
+                            },
+                            {
+                                name: 'mongo数据备份空间',
+                                type: 'line',
+                                {% comment %} yAxisIndex: 0, {% endcomment %}
+                                data: [{% for mongobak in client.clientserver %}{% if mongobak.mongobak %}({{ mongobak.mongobak }} / 1024 / 1024).toFixed(2), {% else %}0, {% endif %}{% endfor %}],
+                            },
+                        ]
+                    };
+                    myChart.setOption(option);
+                </script>
+            </div>
+        </div>
+        {% comment %} {% for server in client.clientserver %}
+        <p>{{ server.mssqluse }}<p>
+        <p>{{ server.create_time }}<p>
+        {% endfor %} {% endcomment %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

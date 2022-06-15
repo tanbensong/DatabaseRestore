@@ -1,0 +1,124 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block newstyle %}
+<style>
+
+</style>
+{% endblock %}
+
+{% block mainBody %}
+<div class="row">
+    <div class="col-md-6">
+        <h4>请选择需要备份的服务器</h4>
+        {% if servers %}
+        <form action="" method="get" class="server source">
+            {% for srv in servers %}
+            <div>
+                <input class="srvname" type="radio" name="source" value="{{ srv.name }}" title="{{ srv.name }}">
+                <label for="{{ srv.name }}"> {{ srv.name }} <mark>{{ srv.address }}</mark></label>
+            </div>
+            {% endfor %}
+        </form>
+        {% else %}
+            <p class="devops-error">抱歉！您还没有任何可操作的服务器</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 dataname">
+        <h4><span id="srvname"></span> <span>请选择需要备份的数据库</span></h4>
+        <ul class="list-unstyled" id="dataname"></ul>
+    </div>
+</div>
+
+<!-- 数据库备份 -->
+<div class="row">
+    <div class="col-md-6 backuptime">
+        <h4><span id="backuptime"></span> 已有备份日期</h4>
+        <div class="row" id="datatime"></div>
+    </div>
+    <div class="col-md-6 backuptime">
+        <div style="width: 400px;">
+            <h4 id="backupsrv"></h4>
+            {% csrf_token %}
+            <button class="btn btn-primary pull-right" id="backup"><span>现在备份</span></button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modalSuccess" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="alert alert-success text-align alert-position" role="alert">
+      <button type="button" class="close" aria-label="Close"><span aria-hidden="true">×</span></button>
+      <p id="flieInfo"></p>
+      <p id="successInfo"></p>
+  </div>
+</div>
+<div class="modal" id="modalFaild" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+  data-backdrop="static">
+  <div class="alert alert-danger text-align alert-position" role="alert">
+      <button type="button" class="close" aria-label="Close"><span aria-hidden="true">×</span></button>
+      <span id="faildInfo">备份失败!</span>
+  </div>
+</div>
+{% endblock %}
+
+{% block Bottom %}
+<div class="alert alert-danger reduction" role="alert" style="padding-bottom: 20px;font-size:40px;">
+    <p class="text-center text-uppercase"><strong>请尽量不要在使用期间备份，避免影响ERP使用</strong></p>
+</div>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    $(function(){
+        function datanameBind() {
+            // 请求对应主机对应数据库的备份日期
+            $("#dataname input").click(function(){
+                var servername = $(".server").find('input[name=source]:checked').val();
+                var dataname = $("#dataname").find('input[name=dataname]:checked').val();
+
+                $('#datatime').empty()
+                _loading($('#datatime'),'before',$('.backuptime'))
+                $.get("/devops/datafile/"+ servername + "/" + dataname + "/", function(output){
+                    let html=''
+                    $("#backuptime, #backupsrv").html("<span id='address'>"+servername+" </span><span id='dbname'>"+dataname+"</span>")
+                    $.each(output.data, function(index,item){
+                        if (item[1] === "此服务器没有备份"){
+                            html += '<div class="col-md-6"><span style="color: red;font-weight:bold;">'+item[1]+'</span></div>'
+                        } else {
+                            html += '<div class="col-md-6"><span>'+item[1]+'</span></div>'
+                        }
+                    });
+                    $('#datatime').html(html);
+                    $(".reduction").show()
+                    _removeLoading($('.backuptime'))
+                });
+            });
+        };
+        
+        $(".server input").click(function(){
+            // 获取 input 标签的 value 值
+            var servername = $(".server").find('input[name=source]:checked').val();
+            $(".backuptime").hide();
+            $('#srvname').html(servername);
+            $('#dataname').empty()
+            _loading($('#dataname'),'before',$('.dataname'))
+            // 请求对应主机显示该主机的数据库
+            $.get("/devops/dataname/" + servername + "/", function(output){
+                $('.dataname').show();
+                let html = ''
+                $.each(output.data, function(index,item){
+                    html +=  '<li><input type="radio" name="dataname" value="'+item[1]+'" title="'+item[0]+'"><label for="'+item[1]+'"> '+item[0]+'</label></li>'
+                });
+               
+                $('#dataname').html(html).ready(function() {
+                    datanameBind()
+                })
+                _removeLoading($('.dataname'))
+            }); 
+        });
+    });
+</script>
+{% endblock %}

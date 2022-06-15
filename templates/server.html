@@ -1,0 +1,155 @@
+{% extends 'top.html' %}{% load static %}
+{% block title %}
+<title>思方运维平台</title>
+{% endblock %}
+{% block style %}
+<style>
+    button {
+        min-width: 178px;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div>
+    <div class="page-header devops-search">
+        <div class="pull-left">
+            <h2>客户服务器信息</h2>
+        </div>
+        <div class="">
+            <form action="" method="post" class="form-inline pull-right devops-search-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        {% csrf_token %}
+                        {{ form.name.label_tag }}
+                        {{ form.name }}
+                        <input type="submit" class="btn btn-primary" style="background-color: #37474f;border-color: #37474f;" value="查询">
+                    </div>
+                </div>
+            </form>
+            <script>
+                $(window).on('load', function () {
+        
+                    $('.selectpicker').selectpicker({
+                    'selectedText': 'cat'
+                    });
+                    
+                    // $('.selectpicker').selectpicker('hide');
+                }); 
+            </script>
+        </div>
+    </div>
+    {% for client in clientinfos %}
+    <div class="devops-server-table">
+        <h3>
+            <span>{{ client.name }} </span>
+            <small>录入时间： <code>{{ client.inputtime }}</code></small>
+            {% if client.login == 1 %}
+            <strong class="devops-bold">已无法登陆</strong>
+            {% endif %}
+            {% if client.remarks %}
+            <span>{{ client.remarks }}</span>
+            {% endif %}
+        </h3>
+        <table class="table table-bordered">
+            <tr>
+                <th rowspan="2" style="display:table-cell; vertical-align:middle;">服务器名称</th>
+                <th rowspan="2" style="display:table-cell; vertical-align:middle;">外网地址</th>
+                <th rowspan="2" style="display:table-cell; vertical-align:middle;">内网地址</th>
+                <th rowspan="2" style="display:table-cell; vertical-align:middle;">ssh 远程端口</th>
+                <th rowspan="2" style="display:table-cell; vertical-align:middle;">ftp 端口</th>
+                <th colspan="3" class="text-center">PostgreSQL</th>
+                <th colspan="3" class="text-center">MongoDB</th>
+                <th colspan="3" class="text-center">SQL server</th>
+                <th rowspan="2" style="display:table-cell; vertical-align:middle;">root 密码</th>
+                <th rowspan="2" style="display:table-cell; vertical-align:middle;">备注</th>
+            </tr>
+            <tr>
+                <th>port</th>
+                <th>user</th>
+                <th>password</th>
+                <th>port</th>
+                <th>user</th>
+                <th>password</th>
+                <th>port</th>
+                <th>user</th>
+                <th>password</th>
+            </tr>
+            {% for server in client.clientserver %}
+            <tr>
+                <td>{{ server.name }}</td>
+                <td>{{ server.address }}</td>
+                <td>{{ server.ipconfig }}</td>
+                <td>{{ server.sshport }}</td>
+                {% if server.ftpport %}
+                <td>{{ server.ftpport }}</td>
+                {% else %}
+                <td></td>
+                {% endif %}
+                {% comment %} postgres 数据库 {% endcomment %}
+                {% if server.pgport %}
+                <td>{{ server.pgport }}</td>
+                <td>postgres</td>
+                {% if usertype == True %}
+                <td>pcb@2o19</td>
+                {% else %}
+                <td class="devops-bold">请 <a href="/devops/login/?next={{ request.get_full_path }}" class="devopsLogin">登陆</a> 后查看</td>
+                {% endif %}
+                {% else %}
+                <td></td>
+                <td></td>
+                <td></td>
+                {% endif %}
+                {% comment %} MongoDB 数据库 {% endcomment %}
+                {% if server.mongoport %}
+                <td>{{ server.mongoport }}</td>
+                <td>superman</td>
+                {% if usertype == True %}
+                <td>pcb@2o19</td>
+                {% else %}
+                <td class="devops-bold">请 <a href="/devops/login/?next={{ request.get_full_path }}" class="devopsLogin">登陆</a> 后查看</td>
+                {% endif %}
+                {% else %}
+                <td></td>
+                <td></td>
+                <td></td>
+                {% endif %}
+                {% comment %} SQL server 数据库 {% endcomment %}
+                {% if server.mssqlport %}
+                <td>{{ server.mssqlport }}</td>
+                {% else %}
+                <td></td>
+                {% endif %}
+                {% if server.sa2password %}
+                <td>sa2</td>
+                {% if usertype == True %}
+                <td>{{ server.sa2password }}</td>
+                {% else %}
+                <td class="devops-bold">请 <a href="/devops/login/?next={{ request.get_full_path }}" class="devopsLogin">登陆</a> 后查看</td>
+                {% endif %}
+                {% else %}
+                <td></td>
+                <td></td>
+                {% endif %}
+                {% comment %} root 密码 {% endcomment %}
+                {% if server.rootpassword %}
+                {% if usertype == True %}
+                <td>{{ server.rootpassword }}</td>
+                {% else %}
+                <td class="devops-bold">请 <a href="/devops/login/?next={{ request.get_full_path }}" class="devopsLogin">登陆</a> 后查看</td>
+                {% endif %}
+                {% else %}
+                <td></td>
+                {% endif %}
+                {% comment %} 备注 {% endcomment %}
+                {% if server.remarks %}
+                <td class="devops-bold">{{ server.remarks }}</td>
+                {% else %}
+                <td></td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

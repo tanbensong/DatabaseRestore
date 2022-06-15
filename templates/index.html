@@ -1,0 +1,95 @@
+{% extends 'top.html' %}
+{% load static %}
+
+{% block style %}
+<style>
+    
+</style>
+{% endblock %}
+
+{% block newstyle %}
+{% endblock %}
+{% block server %}
+{% endblock %}
+{% block content %}
+<!-- 正文内容 -->
+
+        {% block mainBody %}
+        <div>
+            <h3>最近还原动作</h3>
+        </div>
+        {% if record %}
+        <table class="table table-bordered">
+            <tr>
+                <th>用户</th>
+                <th>时间</th>
+                <th>数据库</th>
+                <th>还原日期</th>
+                <th>数据源</th>
+                <th>还原目标</th>
+            </tr>
+            {% for info in page_obj %}
+            <tr>
+                <td>{{ info.user }}</td>
+                <td>{{ info.create_time }}</td>
+                <td>{{ info.name.get_name_display }}</td>
+                <td>{{ info.restore_time }}</td>
+                <td>{{ info.source }}</td>
+                <td>{{ info.target }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p>暂时没有还原记录</p>
+        {% endif %}
+        {% if paginator.count > 1 %}
+        <div class="text-center">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li>
+                        <a href="{% url "home" %}?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="disabled">
+                        <a href="javascript:;" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for page in page_range %}
+                    {% if page == page_obj.number %}
+                    <li class="active"><a href="{% url "home" %}?page={{ page }}">{{ page }}</a></li>
+                    {% else %}
+                    <li><a href="{% url "home" %}?page={{ page }}">{{ page }}</a></li>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li>
+                        <a href="{% url "home" %}?page={{ page_obj.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="disabled">
+                        <a href="javascript:;" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+        {% endblock %}
+
+
+{% block Bottom %}
+{% endblock %}
+{% endblock %}
+{% block script %}
+{% endblock %}

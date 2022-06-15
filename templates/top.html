@@ -1,0 +1,75 @@
+{% extends 'base.html' %} {% load static %} {% block baseBody %}
+<div id="viewport">
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <header>
+      <a href="#">思方运维平台</a>
+    </header>
+    <ul class="nav">
+      {% block server %}
+      <li>
+        <a href="/devops/clientinfo/"> 客户服务器信息 </a>
+      </li>
+      <li>
+        <a href="/devops/clientdeploy/"> 客户部署信息 </a>
+      </li>
+      <li>
+        <a href="/devops/checkjavafile/"> ERP Java 文件检查 </a>
+      </li>
+      <li>
+        <a href="/devops/checkdisk/"> 客户磁盘空间 </a>
+      </li>
+      {% endblock %}
+      <li>
+        <a href="/devops/reduction/"> 数据库还原 </a>
+      </li>
+      <li>
+        <a href="/devops/backup/"> 数据库备份 </a>
+      </li>
+      <li>
+        <a href="/devops/"> 数据库还原记录 </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Content -->
+  <div id="content">
+    <div class="devops-userinfo">
+    <nav class="navbar navbar-default">
+      <div class="container-fluid userinfo">
+        <div class="welcome">
+          <blockquote>
+              {% if username %}
+              <p>欢迎  <strong>{{ username }}</strong> 使用思方运维工具平台</p>
+              {% else %}
+              <p><strong>欢迎使用思方运维工具平台</strong></p>
+              {% endif %}
+          </blockquote>
+        </div>
+        <ul class="nav navbar-nav navbar-right">
+            {% if username %}
+            <li role="presentation">
+              <span class="glyphicon glyphicon-user" aria-hidden="true">
+                {{ username }}
+              </span>
+            </li>
+            <li role="presentation">
+              <span><a href="/devops/userinfo/">/ 个人信息</a></span>
+            </li>
+            <li role="presentation">
+              <span><a href="/devops/logint/"> / 注销</a></span>
+            </li>
+            {% else %}
+            <li role="presentation">
+              <span>查看更多信息请 </span>
+              <span><a href="/devops/login/?next={{ request.get_full_path }}" class="devopsLogin">登录</a></span>
+            </li>
+            {% endif %}
+        </ul>
+      </div>
+    </nav>
+    </dev>
+    <div class="container-fluid">{% block content %} {% endblock %}</div>
+  </div>
+</div>
+{% endblock %} {% block script %} {% endblock %}

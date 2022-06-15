@@ -1,0 +1,113 @@
+{% extends 'top.html' %}{% load static %}
+{% block title %}
+<title>思方运维平台</title>
+{% endblock %}
+{% block style %}
+<style>
+    button {
+        min-width: 178px;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div>
+    <div class="page-header devops-search">
+        <div class="pull-left">
+            <h2>客户服务器部署信息</h2>
+        </div>
+        <div class="">
+            <form action="" method="post" class="form-inline pull-right devops-search-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        {% csrf_token %}
+                        {{ form.name.label_tag }}
+                        {{ form.name }}
+                        <input type="submit" class="btn btn-primary" style="background-color: #37474f;border-color: #37474f;" value="查询">
+                    </div>
+                </div>
+            </form>
+            <script>
+                $(window).on('load', function () {
+
+                    $('.selectpicker').selectpicker({
+                    'selectedText': 'cat'
+                    });
+                    
+                    // $('.selectpicker').selectpicker('hide');
+                }); 
+            </script>
+        </div>
+    </div>
+    {% for client in clientinfos %}
+    <div class="devops-server-table">
+        <h3>
+            <span>{{ client.name }} </span>
+            <small>录入时间： <code>{{ client.inputtime }}</code></small>
+            {% if client.login == 1 %}
+            <strong class="devops-bold">已无法登陆</strong>
+            {% endif %}
+            {% if client.remarks %}
+            <span>{{ client.remarks }}</span>
+            {% endif %}
+        </h3>
+        <table class="table table-bordered">
+            <tr>
+                <th rowspan="2" style="display:table-cell; vertical-align:middle;">环境</th>
+                <th rowspan="2" style="display:table-cell; vertical-align:middle;">内网地址</th>
+                <th colspan="3" class="text-center">ERP</th>
+                <th colspan="2" class="text-center">APP</th>
+                <th colspan="2" class="text-center">报价系统</th>
+                <th rowspan="2" style="display:table-cell; vertical-align:middle;">备注</th>
+            </tr>
+            <tr>
+                <th>访问地址</th>
+                <th>更新端口</th>
+                <th>API 端口</th>
+                <th>是否部署</th>
+                <th>访问地址</th>
+                <th>是否部署</th>
+                <th>访问地址</th>
+            </tr>
+            {% for deploy in client.clientdeploy %}
+            <tr>
+                <td>{{ deploy.name }}</td>
+                <td>{{ deploy.ipconfig }}</td>
+                {% if deploy.erpdeploy == 0 %}
+                <td>{{ deploy.address }}</td>
+                <td>{{ deploy.nginxport }}</td>
+                <td>{{ deploy.gateway }}</td>
+                {% else %}
+                <td></td>
+                <td></td>
+                <td></td>
+                {% endif %}
+                {% if deploy.appdeploy == 0 %}
+                <td>已部署</td>
+                <td>{{ deploy.address }}</td>
+                {% else %}
+                <td></td>
+                <td></td>
+                {% endif %}
+                {% if deploy.offerdeploy == 0 %}
+                <td>已部署</td>
+                {% if deploy.address == '无法访问' %}
+                <td class="devops-bold">外网无法访问</td>
+                {% else %}
+                <td><a href="http://{{ deploy.address }}:{{ deploy.nginxport }}/pcb_uniontrans-web/" target="_blank">http://{{ deploy.address }}:{{ deploy.nginxport }}/pcb_uniontrans-web/</a></td>
+                {% endif %}
+                {% else %}
+                <td></td>
+                <td></td>
+                {% endif %}
+                {% if deploy.remarks %}
+                <td class="devops-bold">{{ deploy.remarks }}</td>
+                {% else %}
+                <td></td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,162 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block newstyle %}
+<style>
+
+</style>
+{% endblock %}
+
+{% block mainBody %}
+<div class="row">
+    <div class="col-md-6">
+        <h4>请选择源数据服务器 <small>准备还原的数据</small></h4>
+        {% if servers %}
+        <form action="" method="get" class="server source">
+            {% for srv in servers %}
+            <div>
+                <input class="srvname" type="radio" name="source" value="{{ srv.name }}" title="{{ srv.name }}">
+                <label for="{{ srv.name }}"> {{ srv.name }} <mark>{{ srv.address }}</mark></label>
+            </div>
+            {% endfor %}
+        </form>
+        {% else %}
+            <p class="devops-error">{{ errmsg }}</p>
+        {% endif %}
+    </div>
+    <div class="col-md-6">
+        <h4>请选择目标数据服务器 <small>需要将数据还原到</small></h4>
+        <form action="" class="target">
+            {% for srv in servers %}
+            <div>
+                <input type="radio" name="target" value="{{ srv.name }}" title="{{ srv.name }}">
+                <label for="{{ srv.name }}"> {{ srv.name }} <mark>{{ srv.address }}</mark></label>
+            </div>
+            {% endfor %}
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 dataname">
+        <h4><span id="srvname"></span> 选择需要还原的数据库</h4>
+        <ul class="list-unstyled" id="dataname"></ul>
+    </div>
+    <div class="col-md-6 backuptime">
+        <h4>选择需要还原的日期</h4>
+        <div class="row" id="datatime"></div>
+    </div>
+</div>
+
+<!-- 数据库还原 -->
+<div class="reduction">
+    {% csrf_token %}
+    <button class="btn btn-primary pull-right" id="reduction"><span>还原</span></button>
+</div>
+
+<div class="modal" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">预览</h4>
+          </div>
+          <div class="modal-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                      <th>源数据服务器</th>
+                      <th>还原的数据库</th>
+                      <th>目标数据库</th>
+                      <th>需要还原的日期</th>
+                    </tr>
+                  </thead>
+                  <tbody id="previewTbody">
+
+                  </tbody>
+           </table>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="reduction1">确认还原</button>
+          </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modalSuccess" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="alert alert-success text-align alert-position" role="alert">
+      <button type="button" class="close" aria-label="Close"><span aria-hidden="true">×</span></button>
+      <p id="flieInfo"></p>
+      <p id="successInfo"></p>
+  </div>
+</div>
+<div class="modal" id="modalFaild" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+  data-backdrop="static">
+  <div class="alert alert-danger text-align alert-position" role="alert">
+      <button type="button" class="close" aria-label="Close"><span aria-hidden="true">×</span></button>
+      <span id="faildInfo">上传失败!</span>
+  </div>
+</div>
+{% endblock %}
+
+{% block Bottom %}
+<div class="alert alert-danger reduction" role="alert" style="padding-bottom: 20px;font-size:40px;">
+    <p class="text-center text-uppercase"><strong>数据珍贵，请选择好了在点击还原</strong></p>
+</div>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    $(function(){
+        function datanameBind() {
+            // 请求对应主机对应数据库的还原日期
+            $("#dataname input").click(function(){
+                var servername = $(".server").find('input[name=source]:checked').val();
+                var dataname = $("#dataname").find('input[name=dataname]:checked').val();
+                $('#datatime').empty()
+                _loading($('#datatime'),'before',$('.backuptime'))
+                $.get("/devops/datafile/"+ servername + "/" + dataname + "/", function(output){
+                    let html=''
+                    $(".backuptime").show()
+                    // 数据库还原请求
+                    $.each(output.data, function(index,item){
+                        if (item[1] == "此服务器没有备份"){
+                            html += '<div class="col-md-6"><span style="color: red;font-weight:bold;">'+item[1]+'</span></div>'
+                        } else {
+                            html += '<div class="col-md-6"><input type="radio" name="datatime" value="'+item[0]+'" title="'+item[1]+'"><label for="'+item[0]+'"> '+item[1]+'</label></div>'
+                        }
+                    });
+                    $('#datatime').html(html);
+                    
+                    $(".reduction").show()
+                    _removeLoading($('.backuptime'))
+                });
+            });
+        };
+        
+        $(".server input").click(function(){
+            // 获取 input 标签的 value 值
+            var servername = $(".server").find('input[name=source]:checked').val();
+            $(".backuptime").hide();
+            $('#srvname').html(servername);
+            $('#dataname').empty()
+            _loading($('#dataname'),'before',$('.dataname'))
+            // 请求对应主机显示该主机的数据库
+            $.get("/devops/dataname/" + servername + "/", function(output){
+                $('.dataname').show();
+                let html = ''
+                $.each(output.data, function(index,item){
+                    html +=  '<li><input type="radio" name="dataname" value="'+item[1]+'" title="'+item[0]+'"><label for="'+item[1]+'"><span> '+item[0]+' </span><mark>'+item[2]+'</mark></label></li>'
+                });
+               
+                $('#dataname').html(html).ready(function() {
+                    datanameBind()
+                })
+                _removeLoading($('.dataname'))
+            }); 
+        });
+    });
+</script>
+{% endblock %}
